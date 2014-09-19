@@ -1,0 +1,270 @@
+/* An application for generating sounds.
+ * 
+ * @author Stephen McMullin
+ * @version 1.0 Comedy Big Red Button version, showing basic functionality.
+ * */
+
+package com.stephenmcmullin.ocja.project;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JButton;
+
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+import jm.JMC;
+import jm.music.data.Part;
+import jm.music.data.Phrase;
+import jm.music.data.Score;
+import jm.music.tools.Mod;
+import jm.util.Play;
+
+import javax.swing.UIManager;
+
+import java.awt.Toolkit;
+
+import javax.swing.JTextField;
+
+@SuppressWarnings("serial")
+public class NoiseMachine extends JFrame implements JMC{
+
+	private JPanel contentPane;
+	private JTextField txtTypeAValue;
+	public int num;
+	SelectSound ss = new SelectSound();
+	static int inst = ORCHESTRA_HIT; //sets default sound
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					NoiseMachine frame = new NoiseMachine();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	/**
+	 * Create the frame.
+	 */
+	public NoiseMachine() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\DLouth06\\Desktop\\radiation.jpg"));
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPane);
+		
+		//Creates Big Red Button
+		JButton btnPanic = new JButton("PANIC!");
+		//Temp image that shows button is depressed
+		btnPanic.setPressedIcon(new ImageIcon("C:\\Users\\DLouth06\\Desktop\\Happy.jpg"));
+		btnPanic.setToolTipText("In case of emergency, press button.");
+		btnPanic.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+						Phasing(inst);
+			}
+		});
+		btnPanic.setForeground(new Color(0,10,0));
+		btnPanic.setBackground(Color.RED);
+		btnPanic.setFont(new Font("Stencil", Font.BOLD, 30));
+		contentPane.add(btnPanic, BorderLayout.CENTER);
+		
+		//Takes value to set number of times sound loops
+		txtTypeAValue = new JTextField();
+		txtTypeAValue.setName("");
+		txtTypeAValue.setText("Type a value between 1 and 10, then hit Panic!");
+		txtTypeAValue.selectAll();
+		txtTypeAValue.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		contentPane.add(txtTypeAValue, BorderLayout.NORTH);
+		txtTypeAValue.setColumns(10);
+		
+		//Opens new window to reset output sound
+		JButton btnMenu = new JButton("Select Sound");
+		btnMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				txtTypeAValue.requestFocusInWindow();
+				txtTypeAValue.selectAll();
+				ss.runSelectSound();
+			}
+		});
+		btnMenu.setFont(new Font("Baskerville Old Face", Font.PLAIN, 14));
+		btnMenu.setForeground(new Color(0, 0, 0));
+		btnMenu.setToolTipText("Select Sound");
+		contentPane.add(btnMenu, BorderLayout.SOUTH);
+	}
+	
+	//Composition of a sample of music
+	public void Phasing(int inst){
+		Phrase melody = new Phrase(0.0);
+		int[] melPitches = {CS3, DS2, CS4, DS3};
+		double[] melRhythm = {SB, SB, SB, SB};
+		melody.addNoteList(melPitches, melRhythm);
+		Part sample = new Part("Sample", inst, 0);
+		sample.addPhrase(melody);
+
+		//Playing sound, setting number of times looped and catching exceptions from text area
+		try{
+		num = Integer.parseInt(txtTypeAValue.getText());
+		if(num > 0 && num <= 10) Mod.repeat(sample, num);
+		Score comp = new Score("Phasing Example", 120);
+		comp.addPart(sample);
+//		Write.midi(comp); 
+		Play.midi(comp);
+		txtTypeAValue.requestFocusInWindow();
+		txtTypeAValue.selectAll();
+		}catch(NumberFormatException nfe){
+			num = 0;
+			txtTypeAValue.setText("Invalid Entry: Please type a value between 1 and 10, then hit Panic!");
+			txtTypeAValue.requestFocusInWindow();
+			txtTypeAValue.selectAll();
+		}
+		
+	}
+}
+
+----------------------------------------------------------------------------------------------------------------------------
+/* A new window that allows user to choose between a number of preset sounds*/
+
+package com.stephenmcmullin.ocja.project;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.BevelBorder;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import jm.JMC;
+
+@SuppressWarnings("serial")
+public class SelectSound extends JDialog implements JMC{
+
+	private final JPanel contentPanel = new JPanel();
+	/**
+	 * Launch the application.
+	 */
+	public void runSelectSound(){
+		try {
+			SelectSound dialog = new SelectSound();
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Create the dialog.
+	 */
+	public SelectSound() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\DLouth06\\Desktop\\radiation.jpg"));
+		setBounds(100, 100, 450, 337);
+		getContentPane().setLayout(new BorderLayout());
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		contentPanel.setLayout(null);
+		
+		//Sets output sound to Waves
+		JButton btnWaves = new JButton("WAVES");
+		btnWaves.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				NoiseMachine.inst = SEA;
+			}
+		});
+		btnWaves.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnWaves.setBounds(10, 21, 414, 38);
+		contentPanel.add(btnWaves);
+		
+		//Sets output sound to Piano
+		JButton btnNewButton = new JButton("Pling!");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+		//		b1.runButton("This is the button that says this.");
+				NoiseMachine.inst = PIANO;
+			}
+		});
+		btnNewButton.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnNewButton.setBounds(10, 70, 414, 38);
+		contentPanel.add(btnNewButton);
+		
+		//Sets output sound to "Goblin"
+		JButton btnNewButton_1 = new JButton("Weird...");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				NoiseMachine.inst = GOBLIN;
+			}
+		});
+		btnNewButton_1.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnNewButton_1.setBounds(10, 119, 414, 38);
+		contentPanel.add(btnNewButton_1);
+		
+		//Sets output sound to "Drops"
+		JButton btnNewButton_2 = new JButton("Also Weird...");
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				NoiseMachine.inst = DROPS;
+			}
+		});
+		btnNewButton_2.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnNewButton_2.setBounds(10, 168, 414, 38);
+		contentPanel.add(btnNewButton_2);
+		
+		//Sets output sound to Harpsichord
+		JButton btnNewButton_3 = new JButton("I'm here to fix the harpsichord...");
+		btnNewButton_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				NoiseMachine.inst = HARPSICHORD;
+			}
+		});
+		btnNewButton_3.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
+		btnNewButton_3.setBounds(10, 217, 414, 38);
+		contentPanel.add(btnNewButton_3);
+		
+		{
+			JPanel buttonPane = new JPanel();
+			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+			getContentPane().add(buttonPane, BorderLayout.SOUTH);
+			
+/* OK and Cancel buttons removed for now
+			{
+				JButton okButton = new JButton("OK");
+				okButton.setActionCommand("OK");
+				buttonPane.add(okButton);
+				getRootPane().setDefaultButton(okButton);
+			}
+			{
+				JButton cancelButton = new JButton("Cancel");
+				cancelButton.setActionCommand("Cancel");
+				buttonPane.add(cancelButton);
+			}
+*/
+		}
+	}
+}
+
